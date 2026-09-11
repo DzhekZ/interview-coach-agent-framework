@@ -1,6 +1,8 @@
+using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Collections.Concurrent;
 using System.Data.Common;
+using System.Net;
 
 using Azure.Identity;
 
@@ -15,10 +17,10 @@ using Microsoft.Extensions.AI;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
+using OllamaSharp;
+
 using OpenAI;
 using OpenAI.Chat;
-
-using OllamaSharp;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,9 +55,8 @@ builder.Services.AddKeyedSingleton<McpClient>("mcp-markitdown", (sp, obj) =>
         }
     };
 
-    var newClient = McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory).GetAwaiter().GetResult();
+    return McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory).GetAwaiter().GetResult();
 
-    return newClient;
 });
 
 
@@ -129,6 +130,7 @@ if (llmProvider == LlmProvider.MicrosoftFoundry)
         {
             Endpoint = new($"{uri.Scheme}://{host}.openai.azure.com/openai/v1/"),
         });
+#pragma warning restore OPENAI001
 
     builder.Services.AddSingleton(client.AsIChatClient());
 }
@@ -146,20 +148,22 @@ else if (llmProvider == LlmProvider.GitHubCopilot)
 }
 else if (llmProvider == LlmProvider.Ollama)
 {
-    var uri = new Uri(config[Constants.OllamaUrl]!);
-    var host = uri.Host.Split('.')[0];
+    var endpoint = new Uri(config[Constants.OllamaUrl]!);
     var model = config[Constants.OllamaModel] ?? "liquid/lfm2.5-1.2b";
-    //ApiKeyCredential apiKeyCredential = new(config[Constants.OllamaApiKey]!);
 
-    //ChatClient client = new(
-    //    model: model,
-    //    credential: apiKeyCredential,
-    //    options: new OpenAIClientOptions()
-    //    {
-    //        Endpoint = new($"{uri.AbsoluteUri}v1/"),
-    //    });
+    // Локальные серверы обычно не проверяют ключ, но SDK требует непустой.
+    var apiKey = config[Constants.OllamaApiKey];
+    if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "your-api-key-here")
+    {
+        apiKey = "local";
+    }
 
-    IChatClient client = new OllamaApiClient(uri, model);
+#pragma warning disable OPENAI001
+    ChatClient client = new(
+        model: model,
+        credential: new ApiKeyCredential(apiKey),
+        options: new OpenAIClientOptions { Endpoint = endpoint });
+#pragma warning restore OPENAI001
 
     builder.Services.AddSingleton(client);
 }

@@ -77,7 +77,7 @@ public static class AgentDelegateFactory
             ? parsedProvider
             : throw new InvalidOperationException($"LLM provider not specified or invalid. Please set the '{Constants.LlmProvider}' configuration value.");
 
-        if (provider == LlmProvider.MicrosoftFoundry)
+        if (provider == LlmProvider.MicrosoftFoundry || provider == LlmProvider.Ollama)
         {
             return new ChatClientAgent(
                 chatClient: services.GetRequiredService<IChatClient>(),
