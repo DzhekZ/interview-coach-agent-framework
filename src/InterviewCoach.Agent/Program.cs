@@ -2,7 +2,6 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Collections.Concurrent;
 using System.Data.Common;
-using System.Net;
 
 using Azure.Identity;
 
@@ -16,8 +15,6 @@ using Microsoft.Extensions.AI;
 
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
-
-using OllamaSharp;
 
 using OpenAI;
 using OpenAI.Chat;
