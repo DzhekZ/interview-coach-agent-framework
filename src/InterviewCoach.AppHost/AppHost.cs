@@ -3,8 +3,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 var mcpMarkItDown = builder.AddContainer(ResourceConstants.McpMarkItDown, "mcp/markitdown", "latest")
-                           .WithHttpEndpoint(targetPort: 3001)
-                           .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001");
+                           .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
+                           .WithHttpEndpoint(targetPort: 3001, name: "http");
 
 // Azure Cosmos DB (NoSQL). Uses the local emulator in run mode and provisions a managed
 // account when published. Aspire creates the database and container as resources, so no
@@ -25,7 +25,8 @@ var mcpInterviewData = builder.AddProject<Projects.InterviewCoach_Mcp_InterviewD
 var agent = builder.AddProject<Projects.InterviewCoach_Agent>(ResourceConstants.Agent)
                    .WithExternalHttpEndpoints()
                    .WithLlmReference(config, args)
-                   .WithEnvironment("AZURE_TENANT_ID", config["AZURE_TENANT_ID"] ?? string.Empty)
+                   //.WithEnvironment("AZURE_TENANT_ID", config["AZURE_TENANT_ID"] ?? string.Empty)
+                   .WithEnvironment("MARKITDOWN_MCP_URL", mcpMarkItDown.GetEndpoint("http"))
                    .WithReference(mcpMarkItDown.GetEndpoint("http"))
                    .WithReference(mcpInterviewData)
                    .WaitFor(mcpMarkItDown)

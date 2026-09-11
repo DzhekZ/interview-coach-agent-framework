@@ -8,11 +8,14 @@ public static class LlmResourceFactory
     private const string LLM_PROVIDER_KEY = "LlmProvider";
     private const string SECTION_NAME_MICROSOFT_FOUNDRY = "MicrosoftFoundry";
     private const string SECTION_NAME_GITHUB_COPILOT = "GitHubCopilot";
+    private const string SECTION_NAME_OLLAMA = "Ollama";
     private const string TOKEN_KEY = "Token";
     private const string DEPLOYMENT_NAME_KEY = "DeploymentName";
     private const string MODEL_VERSION_KEY = "ModelVersion";
     private const string MODEL_FORMAT_KEY = "ModelFormat";
     private const string MODEL_KEY = "Model";
+    private const string Ollama_URL_KEY = "Url";
+    private const string MODEL_API_KEY = "ApiKey";
     private const string SKU_NAME_KEY = "SkuName";
     private const string SKU_CAPACITY_KEY = "SkuCapacity";
     private const string TOKEN_RESOURCE_NAME = "token";
@@ -27,6 +30,7 @@ public static class LlmResourceFactory
         {
             LlmProvider.MicrosoftFoundry => source.AddMicrosoftFoundryResource(config, provider, mode),
             LlmProvider.GitHubCopilot => source.AddGitHubCopilotResource(config, provider, mode),
+            LlmProvider.Ollama => source.AddOllamaResource(config, provider, mode),
             _ => throw new NotSupportedException($"The specified LLM provider '{provider}' is not supported.")
         };
 
@@ -127,6 +131,30 @@ public static class LlmResourceFactory
                               .AddParameter(name: TOKEN_RESOURCE_NAME, value: tokenValue, secret: true);
             source = source.WithEnvironment(COPILOT_GITHUB_TOKEN_KEY, token);
         }
+
+        return source;
+    }
+    
+    private static IResourceBuilder<ProjectResource> AddOllamaResource(this IResourceBuilder<ProjectResource> source, IConfiguration config, LlmProvider provider, AgentMode mode)
+    {
+        var ollama = config.GetSection(SECTION_NAME_OLLAMA);
+        var modelUrl = ollama[Ollama_URL_KEY] ?? "";
+        var modelVersion = ollama[MODEL_KEY] ?? "1";
+        var modelApi = ollama[MODEL_API_KEY] ?? "OpenAI";
+
+        Console.WriteLine();
+        Console.WriteLine($"\tLLM Provider: {provider}");
+        Console.WriteLine($"\tModel: {modelUrl}");
+        Console.WriteLine($"\tAPI: {modelApi}");
+        Console.WriteLine($"\tAgent Mode: {mode}");
+        Console.WriteLine();
+
+
+        source = source.WithEnvironment(AGENT_MODE_KEY, mode.ToString())
+                       .WithEnvironment(LLM_PROVIDER_KEY, provider.ToString())
+                       .WithEnvironment($"{SECTION_NAME_OLLAMA}__{Ollama_URL_KEY}", modelUrl)
+                       .WithEnvironment($"{SECTION_NAME_OLLAMA}__{MODEL_KEY}", modelVersion)
+                       .WithEnvironment($"{SECTION_NAME_OLLAMA}__{MODEL_API_KEY}", modelApi);
 
         return source;
     }

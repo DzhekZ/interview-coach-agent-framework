@@ -1,7 +1,6 @@
 using System.ComponentModel;
 
 using GitHub.Copilot;
-using GitHub.Copilot.Rpc;
 
 using InterviewCoach.Agent;
 
@@ -21,7 +20,8 @@ public enum AgentMode
 public enum LlmProvider
 {
     MicrosoftFoundry,
-    GitHubCopilot
+    GitHubCopilot,
+    Ollama
 }
 
 public static class AgentDelegateFactory
@@ -36,8 +36,11 @@ public static class AgentDelegateFactory
                  : throw new InvalidOperationException($"Agent mode not specified or invalid. Please set the '{Constants.AgentMode}' configuration value.");
 
         var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger(nameof(AgentDelegateFactory));
-        logger.LogInformation("Agent mode: {AgentMode}", mode);
-        logger.LogInformation("LLM provider: {LlmProvider}", provider);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Agent mode: {AgentMode}", mode);
+            logger.LogInformation("LLM provider: {LlmProvider}", provider);
+        }
 
         IHostedAgentBuilder agentBuilder = mode switch
         {

@@ -2,5 +2,6 @@ public enum LlmProvider
 {
     Unknown,
     MicrosoftFoundry,
-    GitHubCopilot
+    GitHubCopilot,
+    Ollama
 }

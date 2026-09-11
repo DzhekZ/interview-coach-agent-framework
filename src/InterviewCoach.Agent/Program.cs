@@ -8,7 +8,6 @@ using GitHub.Copilot;
 
 using InterviewCoach.Agent;
 
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 using Microsoft.Extensions.AI;
@@ -18,6 +17,9 @@ using ModelContextProtocol.Protocol;
 
 using OpenAI;
 using OpenAI.Chat;
+
+using OllamaSharp;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -29,7 +31,7 @@ builder.Services.AddHttpClient("mcp-markitdown", client =>
     client.BaseAddress = new Uri("http://mcp-markitdown");
 });
 
-builder.Services.AddKeyedSingleton<McpClient>("mcp-markitdown", (sp, obj) =>
+builder.Services.AddKeyedSingleton<Task<McpClient>>("mcp-markitdown", async (sp, obj) =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var httpClient = sp.GetRequiredService<IHttpClientFactory>()
@@ -51,7 +53,8 @@ builder.Services.AddKeyedSingleton<McpClient>("mcp-markitdown", (sp, obj) =>
         }
     };
 
-    return McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory).GetAwaiter().GetResult();
+    return await McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory);
+
 });
 
 
@@ -71,7 +74,7 @@ builder.Services.AddKeyedSingleton<McpClient>("mcp-interview-data", (sp, obj) =>
 
     var clientTransportOptions = new HttpClientTransportOptions()
     {
-        Endpoint = new Uri($"{endpoint}/mcp")
+        Endpoint = new Uri($"{endpoint}/mcp/")
     };
     var clientTransport = new HttpClientTransport(clientTransportOptions, httpClient, loggerFactory);
 
@@ -139,6 +142,25 @@ else if (llmProvider == LlmProvider.GitHubCopilot)
         Mode = CopilotClientMode.Empty,
         UseLoggedInUser = string.IsNullOrWhiteSpace(githubToken),
     }));
+}
+else if (llmProvider == LlmProvider.Ollama)
+{
+    var uri = new Uri(config[Constants.OllamaUrl]!);
+    var host = uri.Host.Split('.')[0];
+    var model = config[Constants.OllamaModel] ?? "liquid/lfm2.5-1.2b";
+    //ApiKeyCredential apiKeyCredential = new(config[Constants.OllamaApiKey]!);
+
+    //ChatClient client = new(
+    //    model: model,
+    //    credential: apiKeyCredential,
+    //    options: new OpenAIClientOptions()
+    //    {
+    //        Endpoint = new($"{uri.AbsoluteUri}v1/"),
+    //    });
+
+    IChatClient client = new OllamaApiClient(uri, model);
+
+    builder.Services.AddSingleton(client);
 }
 else
 {
