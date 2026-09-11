@@ -52,7 +52,17 @@ builder.Services.AddKeyedSingleton<McpClient>("mcp-markitdown", (sp, obj) =>
         {
             Name = "MCP MarkItDown Client",
             Version = "1.0.0",
-        }
+        },
+        // Pin the classic "initialize" handshake instead of the SDK's default MCP 2026-07-28
+        // revision, which probes the server with a "server/discover" request before falling
+        // back. The mcp/markitdown:latest image bundles Python mcp==1.8.1, which doesn't
+        // recognize server/discover and, instead of returning a clean JSON-RPC error, throws
+        // an unhandled exception that permanently kills its shared session task group -
+        // breaking every subsequent request (including the fallback) with HTTP 500. Pinning the
+        // exact protocol version the server implements (2024-11-05) skips the probe and avoids
+        // a version-mismatch failure, since the SDK requires an exact echo of the requested
+        // version during the initialize handshake.
+        ProtocolVersion = "2024-11-05",
     };
 
     return McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory).GetAwaiter().GetResult();
@@ -165,7 +175,7 @@ else if (llmProvider == LlmProvider.Ollama)
         options: new OpenAIClientOptions { Endpoint = endpoint });
 #pragma warning restore OPENAI001
 
-    builder.Services.AddSingleton(client);
+    builder.Services.AddSingleton(client.AsIChatClient());
 }
 else
 {
