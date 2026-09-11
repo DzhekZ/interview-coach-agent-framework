@@ -31,13 +31,13 @@ builder.Services.AddHttpClient("mcp-markitdown", client =>
     client.BaseAddress = new Uri("http://mcp-markitdown");
 });
 
-builder.Services.AddKeyedSingleton<Task<McpClient>>("mcp-markitdown", async (sp, obj) =>
+builder.Services.AddKeyedSingleton<McpClient>("mcp-markitdown", (sp, obj) =>
 {
     var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
     var httpClient = sp.GetRequiredService<IHttpClientFactory>()
                        .CreateClient("mcp-markitdown");
     var endpoint = $"{httpClient.BaseAddress!.ToString().TrimEnd('/')}";
-
+    
     var clientTransportOptions = new HttpClientTransportOptions()
     {
         Endpoint = new Uri($"{endpoint}/mcp")
@@ -53,8 +53,9 @@ builder.Services.AddKeyedSingleton<Task<McpClient>>("mcp-markitdown", async (sp,
         }
     };
 
-    return await McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory);
+    var newClient = McpClient.CreateAsync(clientTransport, clientOptions, loggerFactory).GetAwaiter().GetResult();
 
+    return newClient;
 });
 
 
