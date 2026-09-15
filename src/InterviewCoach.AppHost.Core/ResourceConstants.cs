@@ -1,3 +1,5 @@
+namespace InterviewCoach.AppHost.Core;
+
 public class ResourceConstants
 {
     public const string LlmProvider = "LlmProvider";

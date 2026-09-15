@@ -1,3 +1,5 @@
+using InterviewCoach.AppHost.Core;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var config = builder.Configuration;

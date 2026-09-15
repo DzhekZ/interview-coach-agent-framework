@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Configuration;
 
+namespace InterviewCoach.AppHost.Core;
+
 public static class LlmResourceFactory
 {
     private const string DEFAULT_MODEL = "gpt-5-mini";
@@ -134,7 +136,7 @@ public static class LlmResourceFactory
 
         return source;
     }
-    
+
     private static IResourceBuilder<ProjectResource> AddOllamaResource(this IResourceBuilder<ProjectResource> source, IConfiguration config, LlmProvider provider, AgentMode mode)
     {
         var ollama = config.GetSection(SECTION_NAME_OLLAMA);

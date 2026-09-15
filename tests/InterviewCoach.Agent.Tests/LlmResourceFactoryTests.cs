@@ -1,5 +1,4 @@
 extern alias AppHostCore;
-
 using Microsoft.Extensions.Configuration;
 
 using Xunit;
