@@ -1,4 +1,18 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="apphost.settings.json" />
+    <File Path="aspire.config.json" />
+    <File Path="azure.yaml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE.md" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/InterviewCoach.Agent/InterviewCoach.Agent.csproj" />
     <Project Path="src/InterviewCoach.AppHost.Core/InterviewCoach.AppHost.Core.csproj" />
