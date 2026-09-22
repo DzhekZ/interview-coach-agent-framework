@@ -25,10 +25,8 @@ public class InterviewDataDbContext(DbContextOptions<InterviewDataDbContext> opt
     {
         modelBuilder.Entity<InterviewSession>(builder =>
         {
-            builder.ToContainer("interviewsessions");
+            builder.ToTable("interviewsessions");
             builder.HasKey(t => t.Id);
-            builder.HasPartitionKey(t => t.Id);
-            builder.Property(t => t.Id).ToJsonProperty("id");
         });
     }
 }

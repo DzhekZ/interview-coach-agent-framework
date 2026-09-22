@@ -17,6 +17,11 @@ public class InterviewSessionRepository(InterviewDataDbContext db) : IInterviewS
 {
     public async Task<InterviewSession> AddInterviewSessionAsync(InterviewSession interviewSession)
     {
+        // PostgreSQL 'timestamp with time zone' only accepts UTC values, while the session
+        // comes from the MCP client and may carry any offset.
+        interviewSession.CreatedAt = interviewSession.CreatedAt.ToUniversalTime();
+        interviewSession.UpdatedAt = interviewSession.UpdatedAt.ToUniversalTime();
+
         var added = await db.InterviewSessions.AddAsync(interviewSession);
         await db.SaveChangesAsync();
 

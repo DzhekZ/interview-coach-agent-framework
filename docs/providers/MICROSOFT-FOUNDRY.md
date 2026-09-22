@@ -57,7 +57,7 @@ Project-based AppHost:
 aspire start --apphost ./src/InterviewCoach.AppHost
 ```
 
-On the first run, Aspire asks for any missing Azure context, then provisions the Foundry resource and deployment. The local Cosmos DB emulator and MarkItDown container still require Docker.
+On the first run, Aspire asks for any missing Azure context, then provisions the Foundry resource and deployment. The local PostgreSQL and MarkItDown containers still require Docker.
 
 ## Deploy to Azure
 

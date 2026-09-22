@@ -76,7 +76,7 @@ Triage selects the current phase. The normal path runs Receptionist, Behavioural
 | Technical Interviewer   | Runs the technical interview                       | InterviewData                |
 | Summariser              | Writes the final summary and completes the session | InterviewData                |
 
-Each specialist receives only the tools it needs. Interview state remains in Azure Cosmos DB and is accessed through InterviewData MCP rather than directly by an agent.
+Each specialist receives only the tools it needs. Interview state remains in PostgreSQL and is accessed through InterviewData MCP rather than directly by an agent.
 
 ## Provider behavior
 

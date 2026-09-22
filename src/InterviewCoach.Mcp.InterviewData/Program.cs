@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddCosmosDbContext<InterviewDataDbContext>("interviewdb", "interviewdb");
+builder.AddAzureNpgsqlDbContext<InterviewDataDbContext>("interviewdb");
 builder.Services.AddScoped<IInterviewSessionRepository, InterviewSessionRepository>();
 
 builder.Services.AddMcpServer()
@@ -17,17 +17,16 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-if (app.Environment.IsDevelopment())
+// Aspire provisions the PostgreSQL server and the database (AddDatabase), both for the local
+// container and in Azure, where the app's managed identity is a Microsoft Entra administrator
+// of the server. Only the table schema is left to create here.
+using (var scope = app.Services.CreateScope())
 {
-    // The Cosmos DB emulator uses local key auth, so the app can create the database and
-    // container here for a smooth local dev experience. In Azure the account is keyless
-    // (Entra ID), which does not permit management-plane operations from the data-plane SDK,
-    // so the database and container are provisioned by Aspire (AddCosmosDatabase/AddContainer).
-    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<InterviewDataDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
 }
-else
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }

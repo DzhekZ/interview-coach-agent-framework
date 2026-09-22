@@ -1,9 +1,11 @@
 #:sdk Aspire.AppHost.Sdk@13.4.6
-#:package Aspire.Hosting.Azure.CosmosDB
+#:package Aspire.Hosting.Azure.PostgreSQL
 #:project ./src/InterviewCoach.Agent/InterviewCoach.Agent.csproj
 #:project ./src/InterviewCoach.AppHost.Core/InterviewCoach.AppHost.Core.csproj
 #:project ./src/InterviewCoach.Mcp.InterviewData/InterviewCoach.Mcp.InterviewData.csproj
 #:project ./src/InterviewCoach.WebUI/InterviewCoach.WebUI.csproj
+
+using InterviewCoach.AppHost.Core;
 
 using Microsoft.Extensions.Configuration;
 
@@ -18,23 +20,18 @@ var mcpMarkItDown = builder.AddContainer(ResourceConstants.McpMarkItDown, "mcp/m
                            .WithHttpEndpoint(targetPort: 3001)
                            .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001");
 
-// Azure Cosmos DB (NoSQL). Uses the local emulator in run mode and provisions a managed
-// account when published. Aspire creates the database and container as resources, so no
-// runtime resource creation is required (see the EnsureCreatedAsync note in the MCP server).
-var cosmos = builder.AddAzureCosmosDB(ResourceConstants.Cosmos);
-#pragma warning disable ASPIRECOSMOSDB001
-if (builder.ExecutionContext.IsRunMode)
-{
-    cosmos.RunAsPreviewEmulator(emulator => emulator.WithDataExplorer());
-}
-#pragma warning restore ASPIRECOSMOSDB001
+// PostgreSQL. Runs as a local container (with pgAdmin) in run mode and provisions an Azure
+// Database for PostgreSQL flexible server when published. Aspire creates the database as a
+// resource; the MCP server creates the table schema on startup (EnsureCreatedAsync).
+var postgres = builder.AddAzurePostgresFlexibleServer(ResourceConstants.Postgres)
+                      .RunAsContainer(container => container.WithDataVolume()
+                                                            .WithPgAdmin());
 
-var cosmosDb = cosmos.AddCosmosDatabase(ResourceConstants.CosmosDatabase);
-cosmosDb.AddContainer(ResourceConstants.CosmosContainer, "/id");
+var postgresDb = postgres.AddDatabase(ResourceConstants.PostgresDatabase);
 
 var mcpInterviewData = builder.AddProject<Projects.InterviewCoach_Mcp_InterviewData>(ResourceConstants.McpInterviewData)
-                              .WithReference(cosmosDb)
-                              .WaitFor(cosmosDb);
+                              .WithReference(postgresDb)
+                              .WaitFor(postgresDb);
 
 var agent = builder.AddProject<Projects.InterviewCoach_Agent>(ResourceConstants.Agent)
                    .WithExternalHttpEndpoints()

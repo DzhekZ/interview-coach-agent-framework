@@ -8,21 +8,18 @@ var mcpMarkItDown = builder.AddContainer(ResourceConstants.McpMarkItDown, "mcp/m
                            .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
                            .WithHttpEndpoint(targetPort: 3001, name: "http");
 
-// Azure Cosmos DB (NoSQL). Uses the local emulator in run mode and provisions a managed
-// account when published. Aspire creates the database and container as resources, so no
-// runtime resource creation is required (see the EnsureCreatedAsync note in the MCP server).
-var cosmos = builder.AddAzureCosmosDB(ResourceConstants.Cosmos);
-if (builder.ExecutionContext.IsRunMode)
-{
-    cosmos.RunAsPreviewEmulator(emulator => emulator.WithDataExplorer());
-}
+// PostgreSQL. Runs as a local container (with pgAdmin) in run mode and provisions an Azure
+// Database for PostgreSQL flexible server when published. Aspire creates the database as a
+// resource; the MCP server creates the table schema on startup (EnsureCreatedAsync).
+var postgres = builder.AddAzurePostgresFlexibleServer(ResourceConstants.Postgres)
+                      .RunAsContainer(container => container.WithDataVolume()
+                                                            .WithPgAdmin());
 
-var cosmosDb = cosmos.AddCosmosDatabase(ResourceConstants.CosmosDatabase);
-cosmosDb.AddContainer(ResourceConstants.CosmosContainer, "/id");
+var postgresDb = postgres.AddDatabase(ResourceConstants.PostgresDatabase);
 
 var mcpInterviewData = builder.AddProject<Projects.InterviewCoach_Mcp_InterviewData>(ResourceConstants.McpInterviewData)
-                              .WithReference(cosmosDb)
-                              .WaitFor(cosmosDb);
+                              .WithReference(postgresDb)
+                              .WaitFor(postgresDb);
 
 var agent = builder.AddProject<Projects.InterviewCoach_Agent>(ResourceConstants.Agent)
                    .WithExternalHttpEndpoints()

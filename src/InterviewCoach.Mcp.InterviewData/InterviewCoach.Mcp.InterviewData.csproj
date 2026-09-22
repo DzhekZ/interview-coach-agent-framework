@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" />
+    <PackageReference Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
   </ItemGroup>
 

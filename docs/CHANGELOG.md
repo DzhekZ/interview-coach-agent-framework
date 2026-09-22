@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced Azure Cosmos DB with PostgreSQL via the EF Core Npgsql provider; local development uses a PostgreSQL container (with a data volume and pgAdmin), and publishing provisions Azure Database for PostgreSQL flexible server with Microsoft Entra ID authentication
+- The InterviewData MCP server now creates its table schema on startup in every environment
+
+### Removed
+
+- Azure Cosmos DB emulator and Data Explorer from the local development setup
+
 ## [3.0.0] - 2026-08-31
 
 ### Added

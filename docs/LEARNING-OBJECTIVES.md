@@ -33,7 +33,7 @@ The abstraction is in [LlmResourceFactory.cs](../src/InterviewCoach.AppHost.Core
 
 ### 5. Stateful conversations
 
-Sessions persist to Azure Cosmos DB. Resume text, job descriptions, and transcripts survive across turns. Users can pause and pick up later.
+Sessions persist to PostgreSQL. Resume text, job descriptions, and transcripts survive across turns. Users can pause and pick up later.
 
 See [InterviewSessionRepository.cs](../src/InterviewCoach.Mcp.InterviewData/InterviewSessionRepository.cs).
 

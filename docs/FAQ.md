@@ -25,7 +25,7 @@ See [learning objectives](LEARNING-OBJECTIVES.md).
 Treat the repository as a sample and review these areas before production use:
 
 - Review security settings (content filters, authentication)
-- Cosmos DB runs in serverless mode by default — review throughput (RU/s) and partitioning for heavy load
+- PostgreSQL is deployed as an Azure Database for PostgreSQL flexible server — review the compute tier, storage size, and high availability for heavy load
 - Add proper error handling and monitoring for your use case
 
 ### How is this different from other chatbot samples?
@@ -163,7 +163,7 @@ Not with `azd`, but the app is just containers. You could deploy to ECS/Fargate 
 
 ### What about scaling?
 
-Container Apps auto-scales on HTTP request count (including scale-to-zero). Storage uses Azure Cosmos DB (serverless), which scales on its own. MCP servers scale independently.
+Container Apps auto-scales on HTTP request count (including scale-to-zero). Storage uses Azure Database for PostgreSQL flexible server, which scales by changing the compute tier and storage size. MCP servers scale independently.
 
 ---
 
